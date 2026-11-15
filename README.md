@@ -25,34 +25,30 @@ ROS 2 Humble과 개발 도구가 설치된 환경에서 실행합니다.
 
 ```bash
 source /opt/ros/humble/setup.bash
-mkdir -p ~/twolink_ws/src
-cd ~/twolink_ws/src
-git clone https://github.com/Stick-0/twolink_ros2.git
-cd ~/twolink_ws
+cd ~/ros2_ws/src
+git clone https://github.com/Stick-0/twolink_ros2.git .
+cd ~/ros2_ws
 rosdep install --from-paths src --ignore-src --rosdistro humble -r -y
-colcon build --symlink-install --packages-up-to twolink_control
+colcon build
 source install/setup.bash
 ```
-
-`twolink_control`의 실행 의존성은 `rclpy`, `twolink_msgs`, `geometry_msgs`,
-`python3-serial`이며 `package.xml`에 선언되어 있습니다.
 
 ## 키보드 제어
 
 터미널 1에서 시리얼 노드를 실행합니다. `port`는 실제 연결된 장치 경로로 설정합니다.
 
 ```bash
-source /opt/ros/humble/setup.bash
-source ~/twolink_ws/install/setup.bash
-ros2 run twolink_control serial_node --ros-args -p port:=/dev/ttyACM0 -p baudrate:=9600
+cd ros2_ws
+source install/setup.bash
+ros2 run twolink_control serial_node
 ```
 
 터미널 2에서 키보드 노드를 실행하고 해당 터미널에 포커스를 둡니다.
 
 ```bash
-source /opt/ros/humble/setup.bash
-source ~/twolink_ws/install/setup.bash
-ros2 run twolink_control command_node --ros-args -p delta:=0.1
+cd ros2_ws
+source install/setup.bash
+ros2 run twolink_control command_node
 ```
 
 | 키(영문 소문자) | 목표각 설정 |
@@ -100,20 +96,3 @@ ros2 run twolink_control command_node --ros-args -p delta:=0.1
 ```bash
 ros2 run twolink_control serial_node --ros-args -p board_diagnostics:=false
 ```
-
-## 테스트 및 소스 범위
-
-빌드 후 하드웨어 연결 없이 키보드와 시리얼 프로토콜 회귀 테스트를 실행할 수 있습니다.
-
-```bash
-cd ~/twolink_ws
-source install/setup.bash
-python3 -m pytest src/twolink_ros2/twolink_control/test/test_keyboard_command.py \
-  src/twolink_ros2/twolink_control/test/test_serial_protocol.py -q
-```
-
-실행 명령으로 등록된 노드는 `command_node`, `serial_node` 두 개입니다.
-`sub_serial.py`와 `pub_yolo.py`는 기존 실험용 소스이며 현재 실행 경로에 포함되지 않습니다.
-특히 `sub_serial.py`는 현재 보드와 다른 통신 형식을 사용합니다.
-
-라이선스는 기존 패키지 메타데이터에서 아직 지정되지 않았습니다(`TODO: License declaration`).
