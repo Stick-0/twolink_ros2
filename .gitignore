@@ -1,0 +1,21 @@
+# ROS / colcon build output
+build/
+install/
+log/
+
+# Python caches and packaging output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+dist/
+.venv/
+
+# Local editor configuration and environment files
+.vscode/
+.idea/
+.env
+.env.*
+!.env.example
+*.swp
+*~
