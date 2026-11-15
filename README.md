@@ -27,7 +27,7 @@ ROS 2 Humble과 개발 도구가 설치된 환경에서 실행합니다.
 source /opt/ros/humble/setup.bash
 mkdir -p ~/twolink_ws/src
 cd ~/twolink_ws/src
-git clone https://github.com/Stick-0/two_link.git
+git clone https://github.com/Stick-0/twolink_ros2.git
 cd ~/twolink_ws
 rosdep install --from-paths src --ignore-src --rosdistro humble -r -y
 colcon build --symlink-install --packages-up-to twolink_control
@@ -108,8 +108,8 @@ ros2 run twolink_control serial_node --ros-args -p board_diagnostics:=false
 ```bash
 cd ~/twolink_ws
 source install/setup.bash
-python3 -m pytest src/two_link/twolink_control/test/test_keyboard_command.py \
-  src/two_link/twolink_control/test/test_serial_protocol.py -q
+python3 -m pytest src/twolink_ros2/twolink_control/test/test_keyboard_command.py \
+  src/twolink_ros2/twolink_control/test/test_serial_protocol.py -q
 ```
 
 실행 명령으로 등록된 노드는 `command_node`, `serial_node` 두 개입니다.
