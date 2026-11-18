@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import curses
+import math
 import rclpy
 from rclpy.node import Node
 from twolink_msgs.msg import CMD, XYpos
@@ -11,7 +12,7 @@ class PosPublisher(Node):
         self.publisher = self.create_publisher(CMD, 'des_value', 10)
         self.q1_curr = 0.0
         self.q2_curr = 0.0
-        self.delta = self.declare_parameter('delta', 0.1).value
+        self.delta = self.declare_parameter('delta', 0.02).value
         self.q1des = None
         self.q2des = None
         self.command_active = False
@@ -58,21 +59,25 @@ class PosPublisher(Node):
             # Use the latest feedback when the first movement key is pressed.
             self.q1des = self.q1_curr
             self.q2des = self.q2_curr
+        # Accumulate the target even when feedback lags or the joint is stationary.
         if key == ord('e'):
-            self.q1des = self.q1_curr + self.delta
+            self.q1des += self.delta
         elif key == ord('d'):
-            self.q1des = self.q1_curr - self.delta
+            self.q1des -= self.delta
         elif key == ord('r'):
-            self.q2des = self.q2_curr + self.delta
+            self.q2des += self.delta
         elif key == ord('f'):
-            self.q2des = self.q2_curr - self.delta
+            self.q2des -= self.delta
         self.command_active = True
 
     def display_position(self, stdscr):
         stdscr.clear()
         stdscr.addstr(0, 0, f"Current q1={self.q1_curr:.4f}, q2={self.q2_curr:.4f}")
-        q1des_str = f"{self.q1des:.4f}" if self.q1des is not None else "----"
-        q2des_str = f"{self.q2des:.4f}" if self.q2des is not None else "----"
+        # 표시만 current에 가장 가까운 동치 각도로 맞춘다 (2π 주기).
+        q1des_display = self.q1_curr + (self.q1des - self.q1_curr + math.pi) % math.tau - math.pi if self.q1des is not None else None
+        q2des_display = self.q2_curr + (self.q2des - self.q2_curr + math.pi) % math.tau - math.pi if self.q2des is not None else None
+        q1des_str = f"{q1des_display:.4f}" if q1des_display is not None else "----"
+        q2des_str = f"{q2des_display:.4f}" if q2des_display is not None else "----"
         stdscr.addstr(1, 0, f"Desired q1={q1des_str}, q2={q2des_str}")
         stdscr.addstr(3, 0, "Controls: e(+q1), d(-q1), r(+q2), f(-q2)")
         stdscr.addstr(4, 0, f"Step: {self.delta:.4f}")
